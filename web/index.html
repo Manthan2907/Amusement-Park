@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎡 Adventure Park Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <header class="park-header">
+        <div class="header-content">
+            <h1>🎢 Adventure Park Management</h1>
+            <div class="park-status">
+                <span class="status-badge open">🟢 Park Open</span>
+                <span id="visitor-count">Visitors: 0</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button class="nav-btn active" data-section="dashboard">🏠 Dashboard</button>
+        <button class="nav-btn" data-section="visitors">👥 Visitors</button>
+        <button class="nav-btn" data-section="rides">🎡 Rides</button>
+        <button class="nav-btn" data-section="queues">⏱️ Queues</button>
+        <button class="nav-btn" data-section="stats">📊 Statistics</button>
+    </nav>
+
+    <main class="container">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="welcome-banner">
+                <img src="images/park-entrance.jpg" alt="Park Entrance" class="banner-img">
+                <div class="banner-overlay">
+                    <h2>Welcome to Adventure Park! 🎪</h2>
+                    <p>Manage visitors, rides, and queues all in one place</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <h3 id="total-visitors">0</h3>
+                        <p>Total Visitors</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎢</div>
+                    <div class="stat-info">
+                        <h3 id="total-rides">0</h3>
+                        <p>Active Rides</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-info">
+                        <h3 id="avg-wait">0 min</h3>
+                        <p>Avg Wait Time</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <h3 id="satisfaction">0%</h3>
+                        <p>Satisfaction</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="showAddVisitor()">➕ Add Visitor</button>
+                    <button class="action-btn" onclick="showAddRide()">🎡 Add Ride</button>
+                    <button class="action-btn" onclick="refreshData()">🔄 Refresh Data</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visitors Section -->
+        <section id="visitors" class="section">
+            <div class="section-header">
+                <h2>👥 Visitor Management</h2>
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="showAddVisitor()">➕ Add Visitor</button>
+                    <button class="btn-secondary" onclick="showRideSuggestions()">🎯 Get Ride Suggestions</button>
+                    <button class="btn-secondary" onclick="showVisitorHistory()">📜 View Ride History</button>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="visitor-search" placeholder="🔍 Search visitors by name or ID...">
+            </div>
+
+            <div id="visitors-grid" class="visitors-grid">
+                <!-- Visitor cards will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Rides Section -->
+        <section id="rides" class="section">
+            <div class="section-header">
+                <h2>🎡 Ride Management</h2>
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="showAddRide()">➕ Add Ride</button>
+                    <button class="btn-secondary" onclick="showWaitTimes()">⏱️ Sort by Wait Time</button>
+                    <button class="btn-secondary" onclick="showPathFinder()">🗺️ Find Path</button>
+                </div>
+            </div>
+            
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="toggleView('grid')">📱 Grid View</button>
+                <button class="view-btn" onclick="toggleView('wait-time')">⏱️ Wait Time View</button>
+                <button class="view-btn" onclick="toggleView('path')">🗺️ Path View</button>
+            </div>
+
+            <div id="rides-grid" class="rides-grid view-section active">
+                <!-- Ride cards will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Queues Section -->
+        <section id="queues" class="section">
+            <div class="section-header">
+                <h2>⏱️ Queue Status</h2>
+                <button class="btn-secondary" onclick="loadQueues()">🔄 Refresh</button>
+            </div>
+
+            <div id="queues-container" class="queues-container">
+                <!-- Queue information will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section id="stats" class="section">
+            <div class="section-header">
+                <h2>📊 Park Statistics</h2>
+            </div>
+
+            <div class="stats-detailed">
+                <div class="stat-box">
+                    <h3>Visitor Analytics</h3>
+                    <div id="visitor-stats"></div>
+                </div>
+                <div class="stat-box">
+                    <h3>Ride Performance</h3>
+                    <div id="ride-stats"></div>
+                </div>
+                <div class="stat-box">
+                    <h3>Popular Rides</h3>
+                    <div id="popular-rides"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Add Visitor -->
+    <div id="add-visitor-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-visitor-modal')">&times;</span>
+            <h2>➕ Add New Visitor</h2>
+            <form id="add-visitor-form">
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="visitor-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Thrill Preference (1-10):</label>
+                    <input type="number" id="thrill-preference" min="1" max="10" value="5" required>
+                </div>
+                <div class="form-group">
+                    <label>Ticket Type:</label>
+                    <select id="ticket-type">
+                        <option value="0">Normal</option>
+                        <option value="1">Premium</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Add Visitor</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Add Ride -->
+    <div id="add-ride-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-ride-modal')">&times;</span>
+            <h2>🎡 Add New Ride</h2>
+            <form id="add-ride-form">
+                <div class="form-group">
+                    <label>Ride Name:</label>
+                    <input type="text" id="ride-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Thrill Level (1-10):</label>
+                    <input type="number" id="ride-thrill" min="1" max="10" value="5" required>
+                </div>
+                <div class="form-group">
+                    <label>Capacity:</label>
+                    <input type="number" id="ride-capacity" min="1" value="20" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes):</label>
+                    <input type="number" id="ride-duration" min="1" value="5" required>
+                </div>
+                <button type="submit" class="btn-primary">Add Ride</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="park-footer">
+        <p>🎪 Adventure Park Management System | Powered by C Backend + Web UI</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="features.js"></script>
+    
+    <style>
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .view-toggle {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #2d3748;
+            color: white;
+        }
+        
+        .view-btn.active {
+            background: #4299e1;
+        }
+        
+        .wait-time-view {
+            padding: 20px;
+            background: #2d3748;
+            border-radius: 10px;
+        }
+        
+        .wait-time-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .wait-time-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #4a5568;
+            border-radius: 5px;
+        }
+        
+        .wait-badge {
+            background: #4299e1;
+            padding: 4px 8px;
+            border-radius: 15px;
+        }
+        
+        .path-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .path-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #4a5568;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .step-number {
+            background: #4299e1;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: #4a5568;
+            border-radius: 5px;
+        }
+        
+        .suggestion-card {
+            background: #4a5568;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .suggestions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</body>
+</html>

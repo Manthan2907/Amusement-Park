@@ -1,0 +1,18 @@
+id,name,capacity,thrill_level,wait_time
+17,Spooky Mansion,12,5,0
+16,Fun Rapids,14,6,0
+15,Super Coaster,10,10,0
+14,Adventure Wheel,16,4,0
+13,Classic Carousel,20,2,0
+12,Swing Ship,20,5,0
+11,Drop Tower,12,8,0
+10,Family Spinner,16,3,0
+9,Extreme Twister,10,9,0
+8,Haunted House,12,6,0
+7,Water Rapids,14,7,0
+6,Bumper Cars,18,4,0
+5,Roller Coaster X,10,7,0
+4,Ferris Wheel,16,3,0
+3,Sky Screamer,8,10,0
+2,Carousel Dreams,20,2,0
+1,Thunder Mountain,12,8,0

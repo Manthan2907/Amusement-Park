@@ -1,0 +1,91 @@
+🎡 AMUSEMENT PARK UI - IMAGE PLACEMENT GUIDE
+=============================================
+
+Place your images in this folder (d:\dsa_project\web\images\) with these exact names:
+
+REQUIRED IMAGES:
+----------------
+
+1. park-entrance.jpg
+   - Main banner image for dashboard
+   - Suggested: Colorful amusement park entrance gate
+   - Size: 1400x300px (wide banner)
+
+2. default-ride.jpg
+   - Fallback image for rides without specific images
+   - Suggested: Generic carnival/amusement park scene
+   - Size: 350x200px
+
+RIDE-SPECIFIC IMAGES (Optional but recommended):
+-------------------------------------------------
+
+3. rollercoaster.jpg
+   - For roller coaster rides
+   - Size: 350x200px
+
+4. ferris-wheel.jpg
+   - For ferris wheel rides
+   - Size: 350x200px
+
+5. carousel.jpg
+   - For carousel/merry-go-round rides
+   - Size: 350x200px
+
+6. drop-tower.jpg
+   - For drop tower/free fall rides
+   - Size: 350x200px
+
+7. swing.jpg
+   - For swing/pirate ship rides
+   - Size: 350x200px
+
+THRILL-LEVEL BASED IMAGES:
+---------------------------
+
+8. extreme-ride.jpg
+   - For high thrill rides (8-10 level)
+   - Size: 350x200px
+
+9. medium-ride.jpg
+   - For medium thrill rides (5-7 level)
+   - Size: 350x200px
+
+10. family-ride.jpg
+    - For low thrill rides (1-4 level)
+    - Size: 350x200px
+
+
+IMAGE TIPS:
+-----------
+- Use bright, colorful images with good lighting
+- JPG format recommended for photos
+- PNG format for images with transparency
+- Keep file sizes under 500KB for fast loading
+- Use landscape orientation for ride images
+- Avoid images with text overlays
+
+
+WHERE TO FIND FREE IMAGES:
+---------------------------
+- Unsplash.com (search: amusement park, roller coaster, ferris wheel)
+- Pexels.com (search: carnival, theme park, rides)
+- Pixabay.com (search: fairground, fun fair)
+
+
+EXAMPLE SEARCH TERMS:
+---------------------
+- "amusement park entrance"
+- "roller coaster ride"
+- "ferris wheel sunset"
+- "carousel horses"
+- "drop tower ride"
+- "pirate ship ride"
+- "theme park aerial view"
+- "carnival rides night"
+
+
+The UI will automatically:
+- Use specific images based on ride names
+- Fall back to thrill-level images if no name match
+- Use default-ride.jpg if no match found
+- Show placeholder if image fails to load

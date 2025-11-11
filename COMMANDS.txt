@@ -1,0 +1,163 @@
+🎢 AMUSEMENT PARK MANAGEMENT SYSTEM - COMMAND REFERENCE
+======================================================
+
+test the whole program
+in terminal the menu driven program will come
+so then test all options
+and see if anything is wrong
+first do 
+.\build.bat
+then
+.\park_system.exe
+
+
+and then test everything
+
+📦 BUILD & RUN
+--------------
+1. Build the project:
+   .\build.bat
+
+2. Run the application:
+   .\park_system.exe
+
+3. Clean and rebuild:
+   mingw32-make clean
+   mingw32-make
+
+
+🌐 WEB UI ACCESS
+----------------
+- Web UI URL: http://localhost:8000
+- Port: 8000 (configurable in include/web_server.h)
+- Keep terminal running for web server to work
+- Browser auto-refreshes every 5 seconds
+
+
+💻 TERMINAL MENU OPTIONS
+------------------------
+VISITOR OPERATIONS:
+  1. Add Visitor/Group to Park
+  2. Suggest Next Best Ride for Visitor
+  3. Display Visitor Ride History
+  4. Undo Last Ride Choice
+  5. Remove Visitor from Park
+
+RIDE OPERATIONS:
+  6. Add New Ride to Park
+  7. Remove Ride from Park
+  8. Edit Ride Details
+  9. Toggle Ride Status (Open/Closed for Maintenance)
+
+QUEUE & STATISTICS:
+  10. Show Queue Status for All Rides
+  11. Show Rides by Wait Time (BST)
+  12. Display Park Statistics
+
+PATHFINDING & SIMULATION:
+  13. Find Shortest Path Between Rides
+  14. Assign Visitor to Ride
+
+EXIT:
+  0. Exit and Save Data (Shows "PARK CLOSED")
+
+
+📂 DATA FILES
+-------------
+Location: d:\dsa_project\data\
+
+- rides.txt - Ride information (auto-loaded on startup)
+- visitors.txt - Visitor data (if saved)
+- park_map.txt - Park graph/pathfinding data
+
+To reset data: Delete these files before running
+
+
+🖼️ WEB UI IMAGES
+----------------
+Location: d:\dsa_project\web\images\
+
+Required images (optional, fallback to placeholders):
+- park-entrance.jpg (1400x300px)
+- default-ride.jpg (350x200px)
+- rollercoaster.jpg, ferris-wheel.jpg, carousel.jpg
+- drop-tower.jpg, swing.jpg
+- extreme-ride.jpg, medium-ride.jpg, family-ride.jpg
+
+Free image sources:
+- unsplash.com
+- pexels.com
+- pixabay.com
+
+
+🔧 CONFIGURATION
+----------------
+Port: include/web_server.h - WEB_SERVER_PORT
+Max rides: include/config.h - MAX_RIDES
+Max visitors: include/config.h - MAX_VISITORS
+
+
+⚠️ IMPORTANT NOTES
+------------------
+1. Keep terminal running for web UI to work
+2. Web server polls every 50ms while waiting for input
+3. Press Ctrl+C or choose option 0 to exit (shows "PARK CLOSED")
+4. Changes in terminal sync to web UI automatically
+5. Web UI shows real-time data from C backend
+
+
+🐛 TROUBLESHOOTING
+------------------
+Issue: Web UI not loading
+- Check terminal shows "Web UI started at http://localhost:8000"
+- Make sure terminal is not closed
+- Try refreshing browser
+- Check port 8000 is not in use by another app
+
+Issue: Build errors
+- Make sure MinGW GCC is installed and in PATH
+- Run: gcc --version (should show version)
+- Clean and rebuild: .\build.bat
+
+Issue: Data not showing
+- Check data files exist in /data folder
+- Verify rides.txt has valid data
+- Look for errors in terminal output
+
+
+📊 SYSTEM FEATURES
+------------------
+✅ Real-time web UI at localhost:8000
+✅ Terminal menu for all operations
+✅ Dual queue system (Regular + Fast-Pass)
+✅ BST for ride wait time sorting
+✅ Graph-based pathfinding
+✅ Visitor history tracking (Stack)
+✅ Priority queue for ride suggestions
+✅ Auto-save on exit
+✅ Park open/closed status
+✅ Ride maintenance mode
+
+
+🎯 QUICK START
+--------------
+1. cd d:\dsa_project
+2. .\build.bat
+3. .\park_system.exe
+4. Open browser: http://localhost:8000
+5. Use terminal menu or web UI to manage park
+6. Press 0 to exit and save
+
+
+📝 FILE CLEANUP
+---------------
+You can safely delete these files (not needed):
+- PROJECT_SUMMARY.txt
+- WEB_UI_SETUP.txt
+- web/images/IMAGE_GUIDE.txt
+
+Keep these files:
+- README.md (project documentation)
+- COMMANDS.txt (this file)
+- build.bat (build script)
+- Makefile (alternative build)

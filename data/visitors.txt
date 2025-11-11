@@ -1,0 +1,6 @@
+id,name,thrill_preference 
+1001,Alice Johnson,8 
+1002,Bob Smith,3 
+1003,Charlie Brown,10 
+1004,Diana Prince,5 
+1005,Eve Wilson,7 
