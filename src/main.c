@@ -331,12 +331,37 @@ void showQueueStatus() {
         int total_size = getTotalQueueSize(dq);
         updateRideWaitTime(ride, total_size);
         
-        printf("\n[%d] %s\n", ride->id, ride->name);
-        printf("  Regular Queue: %d visitors\n", dq->regular_queue->size);
-        printf("  Fast-Pass Queue: %d visitors\n", dq->fastpass_queue->size);
-        printf("  Total Queue: %d visitors\n", total_size);
-        printf("  Wait Time: %d minutes\n", ride->current_wait_time);
-        printf("  Status: %s\n", ride->is_operational ? "OPEN" : "CLOSED");
+        printf("\n┌─────────────────────────────────────────────┐\n");
+        printf("│ [%d] %-37s │\n", ride->id, ride->name);
+        printf("├─────────────────────────────────────────────┤\n");
+        
+        // Check if ride time has expired and auto-free it
+        time_t current_time = time(NULL);
+        if (ride->ride_in_progress && current_time >= ride->occupied_until_time) {
+            ride->ride_in_progress = 0;
+            ride->time_remaining = 0;
+        }
+        
+        // Show ride status with timer
+        if (ride->ride_in_progress) {
+            int remaining = (int)(ride->occupied_until_time - current_time);
+            printf("│ Status: \033[1;33m🎢 RIDE IN PROGRESS\033[0m         │\n");
+            printf("│ Timer:  \033[1;33m⏱️  %02d:%02d remaining\033[0m            │\n", 
+                   remaining / 60, remaining % 60);
+        } else {
+            printf("│ Status: \033[1;32m✓ AVAILABLE\033[0m                   │\n");
+        }
+        
+        printf("│ Regular Queue:   %2d visitors            │\n", dq->regular_queue->size);
+        printf("│ Fast-Pass Queue: %2d visitors            │\n", dq->fastpass_queue->size);
+        printf("│ \033[1;36mWaiting Queue:   %2d visitors\033[0m            │\n", ride->current_occupancy);
+        printf("│ Total Queue:     %2d visitors            │\n", total_size);
+        printf("│ Wait Time:       %2d minutes             │\n", ride->current_wait_time);
+        printf("│ Ride Duration:   %2d seconds             │\n", ride->ride_duration);
+        printf("│ Operational:     %s%-4s\033[0m              │\n", 
+               ride->is_operational ? "\033[1;32m" : "\033[1;31m",
+               ride->is_operational ? "OPEN" : "CLOSED");
+        printf("└─────────────────────────────────────────────┘\n");
         
         current = current->next;
     }
@@ -426,7 +451,7 @@ void showRidesByWaitTime() {
 
 /* Simulate ride completion */
 void simulateRideCompletion() {
-    displayHeader("SIMULATE RIDE COMPLETION");
+    displayHeader("ENJOY RIDE WITH TIMER & QUEUE SYSTEM");
     
     int visitor_id = getIntInput("Enter visitor ID", 1000, 9999);
     
@@ -436,6 +461,12 @@ void simulateRideCompletion() {
     Ride* ride = findRideById(park_rides, ride_id);
     if (!ride) {
         printError("Ride not found!");
+        return;
+    }
+    
+    // Check if ride is operational
+    if (!ride->is_operational) {
+        printError("Ride is currently closed!");
         return;
     }
     
@@ -453,10 +484,40 @@ void simulateRideCompletion() {
         return;
     }
     
-    // Add to history
+    // Check if ride is currently occupied (time-based)
+    time_t current_time = time(NULL);
+    if (ride->ride_in_progress && current_time < ride->occupied_until_time) {
+        printWarning("Ride is currently occupied!");
+        printf("Adding %s to queue...\n", visitor->name);
+        ride->current_occupancy++;
+        printf("Current queue: %d people waiting\n", ride->current_occupancy);
+        int remaining = (int)(ride->occupied_until_time - current_time);
+        printf("Ride will be free in %d seconds\n", remaining);
+        return;
+    }
+    
+    // If ride time has expired, free it
+    if (ride->ride_in_progress && current_time >= ride->occupied_until_time) {
+        ride->ride_in_progress = 0;
+        ride->time_remaining = 0;
+        printf("Previous ride has completed automatically\n");
+    }
+    
+    // Start the ride (non-blocking)
+    ride->ride_in_progress = 1;
+    ride->occupied_until_time = current_time + ride->ride_duration;
+    ride->time_remaining = ride->ride_duration;
+    
+    printSuccess("Ride started!");
+    printf("\n%s is now enjoying %s!\n", visitor->name, ride->name);
+    printf("Ride Duration: %d seconds\n", ride->ride_duration);
+    printf("Ride will complete at: %s", ctime(&ride->occupied_until_time));
+    printf("Other visitors can enjoy different rides!\n");
+    
+    // Add to history immediately
     Stack* history = visitor_histories[visitor_id % MAX_VISITORS];
     if (history) {
-        push(history, ride, (int)time(NULL));
+        push(history, ride, (int)current_time);
     }
     
     // Update visitor stats
@@ -467,8 +528,8 @@ void simulateRideCompletion() {
     // Update ride stats
     incrementVisitorCount(ride, 1);
     
-    printSuccess("Ride completed successfully!");
-    printf("Satisfaction score: %.1f/100\n", satisfaction);
+    printf("\nSatisfaction score: %.1f/100\n", satisfaction);
+    printf("Ride in progress - check queue status to see timer!\n");
 }
 
 /* Undo last ride */

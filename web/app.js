@@ -287,24 +287,34 @@ function createQueueItem(queue) {
 async function loadStatistics() {
     try {
         const response = await fetch(`${API_BASE}/stats`);
-        const stats = await response.json();
+        let stats = {};
+        try {
+            stats = await response.json();
+        } catch (e) {
+            stats = {};
+        }
+        // Provide defaults if missing
+        const total_visitors = stats.total_visitors ?? 0;
+        const premium_visitors = stats.premium_visitors ?? 0;
+        const avg_satisfaction = Math.round(stats.avg_satisfaction ?? 0);
+        const total_distance = stats.total_distance ?? 0;
         
         // Visitor stats
         const visitorStats = document.getElementById('visitor-stats');
         visitorStats.innerHTML = `
-            <p><strong>Total Visitors:</strong> ${stats.total_visitors}</p>
-            <p><strong>Premium Visitors:</strong> ${stats.premium_visitors}</p>
-            <p><strong>Avg Satisfaction:</strong> ${Math.round(stats.avg_satisfaction)}%</p>
-            <p><strong>Total Distance:</strong> ${stats.total_distance}m</p>
+            <p><strong>Total Visitors:</strong> ${total_visitors}</p>
+            <p><strong>Premium Visitors:</strong> ${premium_visitors}</p>
+            <p><strong>Avg Satisfaction:</strong> ${avg_satisfaction}%</p>
+            <p><strong>Total Distance:</strong> ${total_distance}m</p>
         `;
         
         // Ride stats
         const rideStats = document.getElementById('ride-stats');
         rideStats.innerHTML = `
-            <p><strong>Total Rides:</strong> ${stats.total_rides}</p>
-            <p><strong>Active Rides:</strong> ${stats.active_rides}</p>
-            <p><strong>Avg Wait Time:</strong> ${stats.avg_wait_time} min</p>
-            <p><strong>Total Capacity:</strong> ${stats.total_capacity} people</p>
+            <p><strong>Total Rides:</strong> ${stats.total_rides ?? 0}</p>
+            <p><strong>Active Rides:</strong> ${stats.active_rides ?? 0}</p>
+            <p><strong>Avg Wait Time:</strong> ${stats.avg_wait_time ?? 0} min</p>
+            <p><strong>Total Capacity:</strong> ${stats.total_capacity ?? 0} people</p>
         `;
         
         // Popular rides
@@ -317,7 +327,15 @@ async function loadStatistics() {
             popularRides.innerHTML = '<p>No data available</p>';
         }
     } catch (error) {
-        console.error('Error loading statistics:', error);
+        // Always show at least the visitor analytics box with 0s
+        document.getElementById('visitor-stats').innerHTML = `
+            <p><strong>Total Visitors:</strong> 0</p>
+            <p><strong>Premium Visitors:</strong> 0</p>
+            <p><strong>Avg Satisfaction:</strong> 0%</p>
+            <p><strong>Total Distance:</strong> 0m</p>
+        `;
+        document.getElementById('ride-stats').innerHTML = '';
+        document.getElementById('popular-rides').innerHTML = '';
         showNotification('Failed to load statistics', 'error');
     }
 }
@@ -508,7 +526,7 @@ async function deleteVisitor(visitorId) {
     }
 }
 
-// Enjoy ride
+// Enjoy ride with timer
 async function enjoyRide(rideId) {
     const visitorId = prompt('Enter your Visitor ID (must be 1000 or higher):');
     if (!visitorId || parseInt(visitorId) < 1000) {
@@ -516,7 +534,24 @@ async function enjoyRide(rideId) {
         return;
     }
     
+    // Get ride details first
+    const ride = rides.find(r => r.id === rideId);
+    if (!ride) {
+        showNotification('Ride not found', 'error');
+        return;
+    }
+    
+    // Calculate ride duration based on thrill level (same as backend)
+    const rideDuration = 30 + (ride.thrill_level * 10); // 40-130 seconds
+    
+    // Show timer modal
+    showRideTimerModal(ride.name, rideDuration);
+    
     try {
+        // Start countdown
+        await startRideCountdown(rideDuration);
+        
+        // After countdown, call the API
         const response = await fetch(`${API_BASE}/rides/${rideId}/experience`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -525,9 +560,10 @@ async function enjoyRide(rideId) {
         
         if (response.ok) {
             const data = await response.json();
+            closeRideTimerModal();
             showNotification(`🎉 ${data.message} ${data.visitor_name}'s Satisfaction: ${Math.round(data.satisfaction)}%`, 'success');
-            loadVisitors(); // Refresh visitor list to show updated satisfaction
-            loadDashboard(); // Refresh stats
+            loadVisitors();
+            loadDashboard();
             loadRides();
             loadVisitors();
             loadQueues();
@@ -538,7 +574,76 @@ async function enjoyRide(rideId) {
         }
     } catch (error) {
         console.error('Error enjoying ride:', error);
+        closeRideTimerModal();
         showNotification('Error enjoying ride', 'error');
+    }
+}
+
+// Show ride timer modal
+function showRideTimerModal(rideName, duration) {
+    const modal = document.createElement('div');
+    modal.id = 'ride-timer-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 3rem; border-radius: 20px; text-align: center; min-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 1rem;">🎢 Enjoying ${rideName}!</h2>
+            <div style="font-size: 4rem; font-weight: bold; color: #764ba2; margin: 2rem 0;" id="timer-display">
+                ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}
+            </div>
+            <div style="background: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden; margin: 1rem 0;">
+                <div id="timer-progress" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 100%; transition: width 1s linear;"></div>
+            </div>
+            <p style="color: #666; font-size: 1.1rem;">⏳ Please wait while the ride completes...</p>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Start ride countdown
+function startRideCountdown(duration) {
+    return new Promise((resolve) => {
+        let timeLeft = duration;
+        const timerDisplay = document.getElementById('timer-display');
+        const progressBar = document.getElementById('timer-progress');
+        
+        const interval = setInterval(() => {
+            timeLeft--;
+            
+            // Update timer display
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update progress bar
+            const progress = ((duration - timeLeft) / duration) * 100;
+            progressBar.style.width = `${100 - progress}%`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 1000);
+    });
+}
+
+// Close ride timer modal
+function closeRideTimerModal() {
+    const modal = document.getElementById('ride-timer-modal');
+    if (modal) {
+        modal.remove();
     }
 }
 

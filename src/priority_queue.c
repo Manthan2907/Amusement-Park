@@ -158,21 +158,34 @@ void suggestNextRide(Visitor* visitor, RideList* rides, int current_location, in
     PriorityQueue* pq = buildPriorityQueue(visitor, rides, current_location);
     if (!pq) return;
     
-    printf("\n========== RIDE SUGGESTIONS FOR %s ==========\n", visitor->name);
-    printf("Thrill preference: %d/10\n\n", visitor->thrill_preference);
+    printf("\n========== PRIORITY QUEUE RIDE SUGGESTIONS ==========\n");
+    printf("Visitor: %s | Thrill Preference: %d/10\n", visitor->name, visitor->thrill_preference);
+    printf("Current Location: Ride %d\n\n", current_location);
+    printf("** Using MAX-HEAP Priority Queue **\n");
+    printf("Priority Formula: (Thrill Match x 40) - (Wait Time x 3) - (Distance x 20)\n\n");
     
     int count = 0;
     while (!isPriorityQueueEmpty(pq) && count < top_n) {
         Ride* ride = extractMax(pq);
         if (ride) {
-            printf("%d. %s (Thrill: %d/10, Wait: %d min)\n",
-                   ++count, ride->name, ride->thrill_level, ride->current_wait_time);
+            float thrill_match = calculateThrillMatch(visitor->thrill_preference, ride->thrill_level);
+            int distance = abs(current_location - ride->id);
+            float priority = calculatePriority(visitor, ride, distance);
+            
+            printf("-------------------------------\n");
+            printf("%d. %s\n", ++count, ride->name);
+            printf("   Thrill Level: %d/10 (Match: %.1f/10)\n", ride->thrill_level, thrill_match);
+            printf("   Wait Time: %d min | Distance: %d units\n", ride->current_wait_time, distance);
+            printf("   PRIORITY SCORE: %.2f\n", priority);
+            if (ride->current_occupancy > 0) {
+                printf("   Queue: %d people waiting\n", ride->current_occupancy);
+            }
         }
     }
-    
-    printf("=============================================\n");
+    printf("===============================================\n");
     freePriorityQueue(pq);
 }
+
 
 /* Display top rides */
 void displayTopRides(PriorityQueue* pq, int count) {

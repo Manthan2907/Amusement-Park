@@ -13,6 +13,11 @@ typedef struct Ride {
     int distance_from_entrance;      // In meters
     int total_visitors_served;       // Statistics
     int is_operational;              // 1 = open, 0 = closed
+    int current_occupancy;           // Number of people in queue
+    int ride_in_progress;            // 1 = ride occupied, 0 = available
+    int time_remaining;              // Timer for current ride (in seconds)
+    int ride_duration;               // Duration of one ride cycle (in seconds)
+    time_t occupied_until_time;      // Unix timestamp when ride will be free
 } Ride;
 
 /* Ride Node for Linked List */

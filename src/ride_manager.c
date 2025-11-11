@@ -22,6 +22,14 @@ Ride* createRide(int id, const char* name, int capacity, int thrill_level, int b
     ride->total_visitors_served = 0;
     ride->is_operational = 1;
     
+    // Initialize timer and queue fields
+    ride->current_occupancy = 0;
+    ride->ride_in_progress = 0;
+    ride->time_remaining = 0;
+    ride->occupied_until_time = 0;
+    // Set ride duration based on thrill level (higher thrill = longer ride)
+    ride->ride_duration = 30 + (thrill_level * 10); // 40-130 seconds
+    
     return ride;
 }
 
@@ -44,6 +52,19 @@ void displayRideInfo(Ride* ride) {
     printf("Current Wait Time: %d minutes\n", ride->current_wait_time);
     printf("Status: %s\n", ride->is_operational ? "Operational" : "Closed");
     printf("Total Visitors Served: %d\n", ride->total_visitors_served);
+    
+    // Show ride occupation and queue status
+    if (ride->ride_in_progress) {
+        printf("\033[1;33m🎢 RIDE IN PROGRESS\033[0m - Time Remaining: %d seconds\n", ride->time_remaining);
+    } else {
+        printf("\033[1;32m✓ RIDE AVAILABLE\033[0m\n");
+    }
+    
+    if (ride->current_occupancy > 0) {
+        printf("\033[1;36mQueue:\033[0m %d people waiting\n", ride->current_occupancy);
+    } else {
+        printf("Queue: Empty\n");
+    }
     printf("------------------------\n");
 }
 
